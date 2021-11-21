@@ -1,9 +1,9 @@
-const search = function(){
-    const input = document.querySelector('.search-block > input')
-    const seatchBtn = document.querySelector('.search-block > button')
+function getGoods(){
+    const links = document.querySelectorAll('.navigation-link');
 
     function renderGoods (goods){
         const goodsContainer = document.querySelector('.long-goods-list');
+        console.log(goodsContainer);
         goodsContainer.innerHTML = ``;
         goods.forEach((good)=>{
             
@@ -24,17 +24,16 @@ const search = function(){
 				</div>            
             `
             goodsContainer.append(goodBlock);
+            console.log(goodBlock);
         })
     }
 
-    const getData = (value) =>{
+    const getData = (value, category) =>{
         fetch('/db/db.json')
         .then((res)=> res.json())
         .then((data)=> {
-            const array = data.filter((good) =>{
-                return good.name.toLowerCase().includes(value.toLowerCase());
-            });
-
+            const array = category ? data.filter((item)=>item[category] === value): data;
+            category ? console.log("есть"):console.log("нет");
             localStorage.setItem('goods', JSON.stringify(array));
             window.location.pathname !== "/goods.html" ? window.location.href = '/goods.html': 
             renderGoods(array);
@@ -42,17 +41,19 @@ const search = function(){
         })
     }
 
-    try
-    {
-        seatchBtn.addEventListener('click', () => {
-            getData(input.value);
-        });
-    } catch(e)
-    {
-        console.dir(e);
+    links.forEach((item)=>{
+        item.addEventListener('click', (event)=>{
+            event.preventDefault();
+            const linkValue = item.textContent;
+            const category = item.dataset.field;
+            getData(linkValue, category);
+        })
+    }) 
+
+    if(localStorage.getItem('goods') && window.location.pathname === "/goods.html"){
+        renderGoods(JSON.parse(localStorage.getItem('goods')));
     }
+
 }
 
-
-
-search();
+getGoods();
